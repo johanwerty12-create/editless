@@ -1,7 +1,12 @@
 // Editless service worker. VERSION/BUILD are stamped by scripts/build.mjs.
 const VERSION='__VERSION__',BUILD='__BUILD__',CACHE='editless-'+VERSION+'-'+BUILD,
 ASSETS=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS.map(a=>new Request(a,{cache:'reload'}))))));
+self.addEventListener('install',e=>e.waitUntil((async()=>{
+ try{const c=await caches.open(CACHE);await c.addAll(ASSETS.map(a=>new Request(a,{cache:'reload'})));
+  // page and worker must come from the same build, otherwise do not install (a deploy may be mid-way)
+  if(!(await(await c.match('index.html')).text()).includes("BUILD_ID='"+BUILD+"'"))throw new Error('index.html and sw.js are from different builds');
+ }catch(err){await caches.delete(CACHE);throw err}   // never keep a partial or mixed cache
+})()));
 // No automatic skipWaiting: a new version waits until the page says it is safe, so an open edit is never interrupted.
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x.startsWith('editless-')&&x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
 self.addEventListener('message',e=>{const d=e.data||{};

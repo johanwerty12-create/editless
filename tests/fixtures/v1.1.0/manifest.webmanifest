@@ -1,0 +1,36 @@
+{
+ "id": "./",
+ "name": "Editless",
+ "short_name": "Editless",
+ "description": "Free one-tap auto video editor. Cuts silence, fixes color, reframes for Reels and Shorts. Runs on your device.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#0b0d14",
+ "theme_color": "#6246ff",
+ "categories": [
+  "video",
+  "productivity"
+ ],
+ "icons": [
+  {
+   "src": "icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

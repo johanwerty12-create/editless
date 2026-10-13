@@ -184,7 +184,7 @@ $('dz').ondragover=e=>{e.preventDefault();$('dz').classList.add('over')};
 $('dz').ondragleave=()=>$('dz').classList.remove('over');
 $('dz').ondrop=e=>{e.preventDefault();$('dz').classList.remove('over');load(e.dataTransfer.files[0])};
 $('f').onchange=e=>load(e.target.files[0]);
-const reset=()=>{if(exporting){$('msg').textContent='Export in progress. Please wait until it finishes.';return}v.pause();$('ed').hidden=true;$('hero').hidden=false;$('f').value='';$('out').innerHTML='';$('pb').hidden=true;scrollTo(0,0);if(waiting)applyUpdate()};
+const reset=()=>{if(exporting){$('msg').textContent='Export in progress. Please wait until it finishes.';return}v.pause();$('ed').hidden=true;$('hero').hidden=false;$('f').value='';$('out').innerHTML='';$('pb').hidden=true;scrollTo(0,0);dirty=false;if(waiting)applyUpdate();else if(needReload){reloading=true;location.reload()}};
 $('again').onclick=reset;$('home').onclick=reset;
 document.querySelectorAll('#fmt button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#fmt button').forEach(x=>x.classList.remove('on'));b.classList.add('on');ratio=b.dataset.r;setBox()});
 document.querySelectorAll('#pre button').forEach(b=>b.onclick=()=>{$('sens').value=b.dataset.v;plan()});
@@ -211,7 +211,7 @@ async function load(f){
   if(!isFinite(v.duration)){await new Promise(r=>{const t=setTimeout(r,4000);v.ondurationchange=()=>{if(isFinite(v.duration)){clearTimeout(t);r()}};v.currentTime=1e101});v.ondurationchange=null;v.currentTime=0}
   if(!isFinite(v.duration)||v.duration<=0)throw 0}
  catch(e){file=null;v.removeAttribute('src');v.load();showErr('This browser cannot open that video (unsupported format or damaged file). Try an MP4 (H.264) or WebM, or convert it with a free converter.');return}
- dur=v.duration;v.playbackRate=SP;$('hero').hidden=true;$('ed').hidden=false;$('out').innerHTML='';$('pb').hidden=true;$('go').disabled=true;$('go').textContent='Export video';
+ dur=v.duration;dirty=true;v.playbackRate=SP;$('hero').hidden=true;$('ed').hidden=false;$('out').innerHTML='';$('pb').hidden=true;$('go').disabled=true;$('go').textContent='Export video';
  $('s2c').className='on';$('s3c').className='';scrollTo(0,0);setBox();$('msg').textContent='Analyzing audio and picture…';
  await audio();await color();let g0='shorts';try{g0=localStorage.getItem('ed_goal')||'shorts'}catch(e){}applyGoal(g0);plan();v.style.filter=filt();$('go').disabled=false}
 async function audio(){
@@ -251,10 +251,10 @@ function hookText(x,t,cw,ch){x.filter='none';const fs=Math.round(cw*.07);x.font=
  const mw=cw*.84,L=[];let cur='';t.split(' ').forEach(w=>{const n=cur?cur+' '+w:w;if(x.measureText(n).width>mw&&cur){L.push(cur);cur=w}else cur=n});L.push(cur);
  L.forEach((l,k)=>{const y=ch*.14+fs*1.2*k;x.strokeText(l,cw/2,y);x.fillText(l,cw/2,y)})}
 async function saveFile(b,name){
- if(!window.claude){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();return}
+ if(!window.claude){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();dirty=false;return}
  try{const d=await window.claude.use('downloads');
   if(!d){$('msg').innerHTML='<span class="err">Saving is not available in this view.</span>';return}
-  await d.save({filename:name,data:b});$('msg').textContent='Saved ✓'
+  await d.save({filename:name,data:b});dirty=false;$('msg').textContent='Saved ✓'
  }catch(e){if(!e||e.code!=='declined')$('msg').innerHTML='<span class="err">Could not save ('+((e&&e.code)||'error')+'). Please try again.</span>'}}
 async function thumb(){
  const bt=$('thumb');bt.disabled=true;bt.textContent='Finding best frame…';v.pause();
@@ -354,19 +354,34 @@ async function exportVideo(){
 const sessionActive=()=>!$('ed').hidden;
 function applyUpdate(){if(!waiting||exporting)return;reloading=true;waiting.postMessage({type:'SKIP_WAITING'})}
 function offerUpdate(){if(!waiting)return;if(!sessionActive()&&!exporting){applyUpdate();return}
- $('upd').hidden=false;$('updgo').disabled=exporting;waiting.postMessage({type:'GET_VERSION'})}
+ $('upd').hidden=false;$('updgo').disabled=exporting;$('updgo').textContent='Update now (closes this edit)';$('updgo').onclick=applyUpdate;waiting.postMessage({type:'GET_VERSION'})}
 $('updgo').onclick=applyUpdate;$('updlater').onclick=()=>{$('upd').hidden=true};
-addEventListener('beforeunload',e=>{if(!reloading&&(exporting||sessionActive())){e.preventDefault();e.returnValue=''}});
+let dirty=false,needReload=false,lastChk=0,hadCtl=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);
+$('ed').addEventListener('input',()=>dirty=true);
+$('ed').addEventListener('click',e=>{if(!e.target.closest('#dlb,#go,#again,video'))dirty=true});
+addEventListener('beforeunload',e=>{if(!reloading&&(exporting||(sessionActive()&&dirty))){e.preventDefault();e.returnValue=''}});
+function showReload(){needReload=true;$('upd').hidden=false;$('updt').textContent='Editless was updated in another window. Reload when you finish this edit to use the new version.';
+ $('updgo').disabled=exporting;$('updgo').textContent='Reload now';$('updgo').onclick=()=>{if(exporting)return;reloading=true;location.reload()}}
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
- navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)location.reload()});
- navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='VERSION')$('updt').textContent='Version '+e.data.version+' is ready. Your current edit is safe until you choose to update.'});
- navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
-  const track=w=>w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller){waiting=w;offerUpdate()}});
-  if(reg.waiting&&navigator.serviceWorker.controller){waiting=reg.waiting;offerUpdate()}
+ const sw=navigator.serviceWorker;
+ sw.addEventListener('controllerchange',()=>{
+  if(reloading){location.reload();return}
+  if(!hadCtl){hadCtl=true;return}                 // first install claiming this page: nothing changed
+  if(!sessionActive()&&!exporting){reloading=true;location.reload()}else{sw.controller&&sw.controller.postMessage({type:'GET_VERSION'});showReload()}});  // another window applied an update
+ sw.addEventListener('message',e=>{const d=e.data||{};if(d.type!=='VERSION')return;
+  if(e.source===sw.controller){if(d.build!==BUILD_ID&&!$('ver').dataset.n){$('ver').dataset.n=1;$('ver').textContent+=d.version.localeCompare(APP_VERSION,undefined,{numeric:true})>0?' · v'+d.version+' is installed: reload to use it':' · finishing update from v'+d.version}}
+  else $('updt').textContent='Version '+d.version+' is ready. Your current edit is safe until you choose to update.'});
+ sw.register('sw.js',{updateViaCache:'none'}).then(reg=>{
+  const chk=()=>{const n=Date.now();if(n-lastChk<5000)return;lastChk=n;reg.update().catch(()=>{})};
+  const track=w=>w.addEventListener('statechange',()=>{
+   if(w.state==='installed'&&sw.controller){waiting=w;offerUpdate()}
+   if(w.state==='redundant'&&w!==waiting)setTimeout(chk,300000)});     // failed install: try again later
+  if(reg.waiting&&sw.controller){waiting=reg.waiting;offerUpdate()}
   reg.addEventListener('updatefound',()=>track(reg.installing));
-  const chk=()=>reg.update().catch(()=>{});setInterval(chk,3600000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});
+  chk();setInterval(chk,1800000);addEventListener('online',chk);document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});
+  sw.ready.then(()=>{if(sw.controller)sw.controller.postMessage({type:'GET_VERSION'})});
  }).catch(()=>{});
- navigator.serviceWorker.ready.then(()=>{$('off').hidden=false}).catch(()=>{});
+ sw.ready.then(()=>{$('off').hidden=false}).catch(()=>{});
 }
 let dp;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('inst').hidden=false});
 addEventListener('appinstalled',()=>{$('inst').hidden=true});
