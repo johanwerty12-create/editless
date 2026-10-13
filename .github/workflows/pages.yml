@@ -1,15 +1,19 @@
-﻿name: Deploy Editless
+name: Deploy Editless to GitHub Pages
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 concurrency:
   group: pages
   cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,8 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Build (stamps version + cache id, verifies output)
+        run: node scripts/build.mjs
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: dist
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -62,7 +62,7 @@ video{width:100%;height:100%;display:block;object-fit:cover}
 .sw input:checked+s:after{left:22px}
 .sw input:focus-visible+s{outline:3px solid var(--ac);outline-offset:2px}
 input[type=range]{width:100%;accent-color:var(--ac)}
-.tl{position:relative;height:30px;background:var(--bad);border-radius:9px;overflow:hidden}
+.tl{cursor:pointer;position:relative;height:30px;background:var(--bad);border-radius:9px;overflow:hidden}
 .tl span{position:absolute;top:0;bottom:0;background:var(--ok)}
 .leg{display:flex;gap:14px;font-size:12px;color:var(--mu);margin-top:6px}
 .leg b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
@@ -96,10 +96,11 @@ footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 0 40px}
 .phone{position:relative}
 .ghost{width:100%;padding:11px;border:1px solid var(--ac);background:none;color:var(--ac);border-radius:11px;font-weight:700;cursor:pointer;margin-top:12px}
 .ghost:disabled{opacity:.6}
+#upd{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);z-index:50;background:var(--card);border:1px solid var(--ac);border-radius:14px;padding:12px 14px;box-shadow:var(--sh);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:14px}
 [hidden]{display:none!important}
 </style></head><body>
 <header><div class="wrap"><nav>
-<button class="logo" id="home" aria-label="Editless home"><i>✂</i>Edit<span style="color:var(--ac)">less</span></button>
+<button class="logo" id="home" aria-label="Editless home"><i>✂</i><span>Edit<span style="color:var(--ac)">less</span></span></button>
 <a href="#features">Features</a><a href="#faq">FAQ</a>
 <button class="ib" id="inst" hidden style="width:auto;padding:0 14px;font-weight:700;color:var(--ac)">Install app</button>
 <button class="ib" id="th" aria-label="Toggle dark mode">🌓</button>
@@ -107,11 +108,11 @@ footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 0 40px}
 
 <main class="wrap">
 <div id="hero" class="hero">
-<h1>Edit videos in <em>one tap.</em><br>Free. Forever.</h1>
-<p>Drop your video and Editless removes dead air, fixes colors, evens out sound and fits it to Reels, Shorts or TikTok. No watermark. Nothing is uploaded.</p>
+<h1>Edit videos in <em>one tap.</em><br>Free. No watermark.</h1>
+<p>Record one raw take. Editless turns it into a post-ready video: it removes dead air, fixes colors, evens out sound and fits it to Reels, Shorts or TikTok. No watermark. Nothing is uploaded.</p>
 <label class="drop" id="dz"><input id="f" type="file" accept="video/*" hidden>
 <div class="ic">🎬</div><b>Choose a video</b><span>Tap here or drag &amp; drop · MP4, MOV, WebM</span></label>
-<div class="chips"><i>✂ Cuts silence</i><i>✨ Auto color</i><i>🔊 Even volume</i><i>📱 Auto reframe</i><i>🔒 100% private</i></div>
+<p id="lerr" class="err" role="alert" hidden style="margin:12px auto 0;max-width:640px"></p><div class="chips"><i>✂ Cuts silence</i><i>✨ Auto color</i><i>🔊 Even volume</i><i>📱 Auto reframe</i><i>🔒 100% private</i></div>
 </div>
 
 <div id="ed" hidden>
@@ -122,8 +123,10 @@ footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 0 40px}
 <p class="note" style="text-align:center">Preview plays with the cuts and color applied.</p>
 </div>
 <div>
+<div class="card"><h3>🎯 What are you making?</h3><div class="seg" id="goal" style="grid-template-columns:1fr 1fr 1fr"><button data-g="shorts" class="on">Shorts · Reels · TikTok</button><button data-g="yt">YouTube video</button><button data-g="feed">Feed post</button></div><p class="note">One tap sets the format, cuts and zoom. Fine-tune below if you like.</p></div>
 <div class="card"><h3>📐 Format</h3>
-<div class="seg" id="fmt"><button data-r="9/16" class="on">Reels · 9:16</button><button data-r="1/1">Square · 1:1</button><button data-r="orig">Original</button></div></div>
+<div class="seg" id="fmt" style="grid-template-columns:repeat(5,1fr)"><button data-r="9/16" class="on">9:16</button><button data-r="1/1">1:1</button><button data-r="4/5">4:5</button><button data-r="16/9">16:9</button><button data-r="orig">Original</button></div>
+<div class="lbl">Framing</div><div class="seg" id="fit" style="grid-template-columns:1fr 1fr"><button data-v="0" class="on">Fill (crops edges)</button><button data-v="1">Fit (blurred bars)</button></div></div>
 <div class="card"><h3>⚡ Auto-edit</h3>
 <div class="row"><span>Remove silences<small>Cuts dead air and long pauses</small></span><label class="sw"><input type="checkbox" id="oSil" checked><s></s></label></div>
 <div id="sensW"><div class="seg" id="pre" style="margin:4px 0 8px"><button data-v="7">Tight</button><button data-v="5" class="on">Balanced</button><button data-v="3">Natural</button></div>
@@ -143,7 +146,7 @@ footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 0 40px}
 <div class="card"><h3>⏱ Result</h3>
 <div class="tl" id="tl"></div>
 <div class="leg"><span><b style="background:var(--ok)"></b>Kept</span><span><b style="background:var(--bad)"></b>Removed</span></div>
-<div class="stats"><div class="stat"><b id="a1">–</b><small>Original</small></div><div class="stat"><b id="a2">–</b><small>After</small></div><div class="stat hl"><b id="a3">–</b><small>Time saved</small></div></div>
+<p class="note" style="margin:6px 0 0">Tip: tap the bar to restore or remove a section.</p><div class="stats"><div class="stat"><b id="a1">–</b><small>Original</small></div><div class="stat"><b id="a2">–</b><small>After</small></div><div class="stat hl"><b id="a3">–</b><small>Time saved</small></div></div>
 <p class="note" id="msg">Analyzing…</p></div>
 <div class="act"><button class="go" id="go" disabled>Export video</button>
 <div class="bar" id="pb" hidden><div id="pf"></div></div><div id="out"></div>
@@ -160,12 +163,18 @@ footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 0 40px}
 <details><summary>Is it really free?</summary><p>Yes. No signup, no watermark, no export limits.</p></details>
 <details><summary>Is my video uploaded anywhere?</summary><p>No. All editing happens inside your browser on your own device.</p></details>
 <details><summary>How long does export take?</summary><p>About as long as the finished video, because it is rendered in real time.</p></details>
+<details><summary>What does it work best on?</summary><p>Videos where someone is talking. Music-only or very noisy videos may not cut well, so check the green and red timeline before exporting.</p></details>
 <details><summary>Which browsers work?</summary><p>Recent Chrome, Edge and Safari. If export fails, try Chrome.</p></details></section>
 </main>
-<footer>Editless · Edit less, post more.</footer>
+<div id="upd" role="status" hidden><span id="updt">A new version is ready. Your current edit is safe until you choose to update.</span><div><button id="updgo" class="go" style="width:auto;padding:10px 14px;font-size:14px">Update now (closes this edit)</button><button id="updlater" class="sec" style="margin-left:8px">Later</button></div></div>
+<footer>Editless · Edit less, post more.<br><small id="ver"></small><small id="off" hidden> · Works offline ✓</small></footer>
 
 <script>
+const APP_VERSION='__VERSION__',BUILD_ID='__BUILD__';
 const $=id=>document.getElementById(id),v=$('v');
+let exporting=false,waiting=null,reloading=false;
+const seekTo=(el,t)=>new Promise(r=>{const to=setTimeout(r,5000);el.onseeked=()=>{clearTimeout(to);r()};el.currentTime=t});
+$('ver').textContent='Editless v'+APP_VERSION+(BUILD_ID.startsWith('__')?' (dev build)':' · build '+BUILD_ID);
 let file,url,segs=[],dur=0,enh={b:1,c:1,s:1},gain=1,ratio='9/16',rms=[];const W=.05;
 const fmt=s=>{s=Math.max(0,s);return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')};
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
@@ -175,28 +184,38 @@ $('dz').ondragover=e=>{e.preventDefault();$('dz').classList.add('over')};
 $('dz').ondragleave=()=>$('dz').classList.remove('over');
 $('dz').ondrop=e=>{e.preventDefault();$('dz').classList.remove('over');load(e.dataTransfer.files[0])};
 $('f').onchange=e=>load(e.target.files[0]);
-const reset=()=>{v.pause();$('ed').hidden=true;$('hero').hidden=false;$('f').value='';$('out').innerHTML='';$('pb').hidden=true;scrollTo(0,0)};
+const reset=()=>{if(exporting){$('msg').textContent='Export in progress. Please wait until it finishes.';return}v.pause();$('ed').hidden=true;$('hero').hidden=false;$('f').value='';$('out').innerHTML='';$('pb').hidden=true;scrollTo(0,0);if(waiting)applyUpdate()};
 $('again').onclick=reset;$('home').onclick=reset;
 document.querySelectorAll('#fmt button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#fmt button').forEach(x=>x.classList.remove('on'));b.classList.add('on');ratio=b.dataset.r;setBox()});
 document.querySelectorAll('#pre button').forEach(b=>b.onclick=()=>{$('sens').value=b.dataset.v;plan()});
 ['oSil','oEnh','oVol','oZoom','oVoice'].forEach(i=>$(i).onchange=()=>{plan();v.style.filter=filt();v.ontimeupdate()});
 $('sens').oninput=plan;
-let HL=0,SP=1;
+let HL=0,SP=1,FIT=0,bigFile=false;
 const segBtns=(id,fn)=>document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');fn(+b.dataset.v)});
 segBtns('hl',n=>{HL=n;plan()});segBtns('spd',n=>{SP=n;v.playbackRate=n;plan()});
 $('hook').oninput=()=>ov();
+segBtns('fit',n=>{FIT=n;setBox()});
+const GOALS={shorts:{r:'9/16',z:1,s:5},yt:{r:'16/9',z:0,s:3},feed:{r:'4/5',z:1,s:5}};
+function applyGoal(g){const o=GOALS[g]||GOALS.shorts;document.querySelectorAll('#goal button').forEach(x=>x.classList.toggle('on',x.dataset.g===g));
+ const fb=document.querySelector('#fmt button[data-r="'+o.r+'"]');if(fb)fb.click();$('oZoom').checked=!!o.z;$('sens').value=o.s;
+ if(dur){plan();v.style.filter=filt();v.ontimeupdate()}try{localStorage.setItem('ed_goal',g)}catch(e){}}
+document.querySelectorAll('#goal button').forEach(b=>b.onclick=()=>applyGoal(b.dataset.g));
 function setBox(){
  const p=$('phone');p.style.aspectRatio=ratio==='orig'?(v.videoWidth+'/'+v.videoHeight):ratio;
- p.style.maxWidth=ratio==='9/16'?'260px':ratio==='1/1'?'340px':(v.videoWidth>=v.videoHeight?'100%':'260px');
- v.style.objectFit=ratio==='orig'?'contain':'cover'}
+ p.style.maxWidth=ratio==='9/16'?'260px':ratio==='16/9'?'100%':ratio==='orig'?(v.videoWidth>=v.videoHeight?'100%':'260px'):'320px';
+ v.style.objectFit=(ratio==='orig'||FIT)?'contain':'cover'}
 async function load(f){
- if(!f)return;if(!f.type.startsWith('video/')){alert('Please choose a video file.');return}
+ if(!f)return;showErr('');if(!(f.type.startsWith('video/')||/\.(mp4|m4v|mov|webm|mkv|avi|3gp|ogv)$/i.test(f.name))){showErr('That does not look like a video file. Choose an MP4, MOV or WebM video.');return}
  file=f;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(f);v.src=url;
- try{await new Promise((r,j)=>{v.onloadedmetadata=r;v.onerror=()=>j()})}catch(e){alert('This video format is not supported by your browser.');return}
+ try{await new Promise((r,j)=>{v.onloadedmetadata=r;v.onerror=()=>j();setTimeout(()=>j(),15000)});
+  if(!isFinite(v.duration)){await new Promise(r=>{const t=setTimeout(r,4000);v.ondurationchange=()=>{if(isFinite(v.duration)){clearTimeout(t);r()}};v.currentTime=1e101});v.ondurationchange=null;v.currentTime=0}
+  if(!isFinite(v.duration)||v.duration<=0)throw 0}
+ catch(e){file=null;v.removeAttribute('src');v.load();showErr('This browser cannot open that video (unsupported format or damaged file). Try an MP4 (H.264) or WebM, or convert it with a free converter.');return}
  dur=v.duration;v.playbackRate=SP;$('hero').hidden=true;$('ed').hidden=false;$('out').innerHTML='';$('pb').hidden=true;$('go').disabled=true;$('go').textContent='Export video';
  $('s2c').className='on';$('s3c').className='';scrollTo(0,0);setBox();$('msg').textContent='Analyzing audio and picture…';
- await audio();await color();plan();v.style.filter=filt();$('go').disabled=false}
+ await audio();await color();let g0='shorts';try{g0=localStorage.getItem('ed_goal')||'shorts'}catch(e){}applyGoal(g0);plan();v.style.filter=filt();$('go').disabled=false}
 async function audio(){
+ if(file.size>700*1024*1024){rms=[];bigFile=true;return}bigFile=false;
  rms=[];
  try{const ac=new(window.AudioContext||window.webkitAudioContext)();
   const buf=await ac.decodeAudioData(await file.arrayBuffer());ac.close();
@@ -219,7 +238,7 @@ function plan(){
  const tot=segs.reduce((a,s)=>a+s[1]-s[0],0);
  $('tl').innerHTML=segs.map(s=>`<span style="left:${s[0]/dur*100}%;width:${(s[1]-s[0])/dur*100}%"></span>`).join('');
  $('a1').textContent=fmt(dur);$('a2').textContent=fmt(tot/SP);$('a3').textContent=fmt(dur-tot/SP);
- $('msg').textContent=rms.length?'Auto-edit ready. Press Export when happy.':'No audio found, so silence removal was skipped.'}
+ const rem=1-tot/dur;$('msg').textContent=bigFile?'This file is very large, so silence removal was skipped to avoid running out of memory. Try a smaller file.':!rms.length?'No audio found, so silence removal was skipped.':rem>.6?'Over half the video was cut. If that feels too much, choose Natural.':'Auto-edit ready. Export takes about '+Math.max(1,Math.round(tot/SP/60))+' min (real time).'}
 function highlights(base,target){
  const tot=base.reduce((a,s)=>a+s[1]-s[0],0);if(tot<=target*1.1||!rms.length)return base;
  const P=[];base.forEach(s=>{for(let a=s[0];a<s[1];a+=3){const b=Math.min(s[1],a+3);if(b-a<.8)continue;let e=0,n=0;for(let k=Math.floor(a/W);k<Math.min(rms.length,Math.floor(b/W));k++){e+=rms[k];n++}P.push([a,b,n?e/n:0])}});
@@ -242,12 +261,12 @@ async function thumb(){
  const c=document.createElement('canvas'),w=64,h=64;c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});
  const T=[];segs.forEach(s=>{for(let k=1;k<=3;k++)T.push(s[0]+(s[1]-s[0])*k/4)});
  const step=Math.max(1,Math.ceil(T.length/14));let best=T[0]||0,bs=-1;
- for(let n=0;n<T.length;n+=step){v.currentTime=T[n];await new Promise(r=>v.onseeked=r);x.drawImage(v,0,0,w,h);
+ for(let n=0;n<T.length;n+=step){await seekTo(v,T[n]);x.drawImage(v,0,0,w,h);
   const d=x.getImageData(0,0,w,h).data;let sh=0,L=0;
   for(let p=0;p<d.length-4;p+=4){sh+=Math.abs(d[p+1]-d[p+5]);L+=d[p+1]}
   L/=d.length/4;const sc=sh*(1-Math.abs(L-125)/200);if(sc>bs){bs=sc;best=T[n]}}
- v.currentTime=best;await new Promise(r=>v.onseeked=r);
- const vw=v.videoWidth,vh=v.videoHeight,rr=ratio==='orig'?[vw,vh]:ratio==='1/1'?[1,1]:[9,16];
+ await seekTo(v,best);
+ const vw=v.videoWidth,vh=v.videoHeight,rr=ratio==='orig'?[vw,vh]:ratio.split('/').map(Number);
  const tw=ratio==='orig'?Math.min(vw,1280):1080,th=Math.round(tw*rr[1]/rr[0]);
  const o=document.createElement('canvas');o.width=tw;o.height=th;const y=o.getContext('2d');
  y.filter=filt();const sr=vw/vh,tr=tw/th;let sw=vw,sh2=vh,sx=0,sy=0;
@@ -257,10 +276,28 @@ async function thumb(){
  o.toBlob(bl=>saveFile(bl,'thumbnail.png'),'image/png');
  bt.disabled=false;bt.textContent='🖼 Save best thumbnail'}
 $('thumb').onclick=thumb;
+let wl=null,recRef=null,evRef=null;
+async function getLock(){try{if(navigator.wakeLock)wl=await navigator.wakeLock.request('screen')}catch(e){}}
+function releaseLock(){try{wl&&wl.release()}catch(e){}wl=null;recRef=evRef=null;exporting=false;const u=$('updgo');if(u)u.disabled=false}
+document.addEventListener('visibilitychange',async()=>{
+ if(!recRef||!evRef)return;
+ if(document.hidden){evRef.pause();if(recRef.state==='recording')recRef.pause();$('msg').textContent='Export paused. Come back to this screen to continue.'}
+ else{await getLock();if(recRef.state==='paused')recRef.resume();try{await evRef.play()}catch(e){}$('msg').textContent='Exporting… keep this screen open.'}});
+function showErr(m){const e=$('lerr');e.textContent=m;e.hidden=!m;if(m)$('f').value=''}
+function stats(){const tot=segs.reduce((a,s)=>a+s[1]-s[0],0);
+ $('tl').innerHTML=segs.map(s=>`<span style="left:${s[0]/dur*100}%;width:${(s[1]-s[0])/dur*100}%"></span>`).join('');
+ $('a1').textContent=fmt(dur);$('a2').textContent=fmt(tot/SP);$('a3').textContent=fmt(dur-tot/SP);
+ $('msg').textContent='Edited by hand. Export takes about '+Math.max(1,Math.round(tot/SP/60))+' min (real time).'}
+$('tl').onclick=e=>{const r=e.currentTarget.getBoundingClientRect(),t=(e.clientX-r.left)/r.width*dur;
+ const i=segs.findIndex(s=>t>=s[0]&&t<=s[1]);
+ if(i>=0){if(segs.length>1)segs.splice(i,1)}
+ else{const pv=[...segs].reverse().find(s=>s[1]<=t),nx=segs.find(s=>s[0]>=t);segs.push([pv?pv[1]:0,nx?nx[0]:dur]);segs.sort((x,y)=>x[0]-y[0]);
+  const m=[];segs.forEach(s=>{if(m.length&&s[0]-m[m.length-1][1]<.05)m[m.length-1][1]=Math.max(m[m.length-1][1],s[1]);else m.push([s[0],s[1]])});segs=m}
+ stats()};
 async function color(){
  try{const c=document.createElement('canvas');c.width=c.height=48;const x=c.getContext('2d',{willReadFrequently:true});
   let L=0,S=0,N=0,mn=255,mx=0;
-  for(let i=1;i<=6;i++){v.currentTime=dur*i/7;await new Promise(r=>v.onseeked=r);x.drawImage(v,0,0,48,48);
+  for(let i=1;i<=6;i++){await seekTo(v,dur*i/7);x.drawImage(v,0,0,48,48);
    const d=x.getImageData(0,0,48,48).data;
    for(let p=0;p<d.length;p+=4){const l=.3*d[p]+.59*d[p+1]+.11*d[p+2];L+=l;N++;mn=Math.min(mn,l);mx=Math.max(mx,l);S+=Math.max(d[p],d[p+1],d[p+2])-Math.min(d[p],d[p+1],d[p+2])}}
   v.currentTime=0;L/=N;S/=N;
@@ -274,45 +311,63 @@ v.ontimeupdate=()=>{const t=v.currentTime,k=segs.findIndex(s=>t>=s[0]&&t<s[1]);
  if(v.paused)return;
  if(k<0){const nx=segs.find(s=>s[0]>t);if(nx)v.currentTime=nx[0];else v.pause()}};
 
-$('go').onclick=async()=>{
+$('go').onclick=()=>exportVideo().catch(err=>{console.error(err);releaseLock();$('msg').innerHTML='<span class="err">Export failed on this device. Try a shorter clip, Fill framing, or Chrome.</span>';$('go').disabled=false;$('go').textContent='Try export again';$('pb').hidden=true});
+async function exportVideo(){
  const go=$('go');
  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){$('msg').innerHTML='<span class="err">This browser cannot export. Please use Chrome, Edge or Safari.</span>';return}
- v.pause();go.disabled=true;go.textContent='Editing… 0%';$('out').innerHTML='';$('pb').hidden=false;$('pf').style.width='0';$('s3c').className='on';
+ v.pause();exporting=true;await getLock();go.disabled=true;go.textContent='Editing… 0%';$('out').innerHTML='';$('pb').hidden=false;$('pf').style.width='0';$('s3c').className='on';
  const ev=document.createElement('video');ev.src=url;ev.playsInline=true;
- await new Promise(r=>ev.onloadedmetadata=r);
- const vw=ev.videoWidth,vh=ev.videoHeight;let cw,ch;
+ await new Promise((r,j)=>{ev.onloadedmetadata=r;ev.onerror=()=>j(new Error('load'));setTimeout(()=>j(new Error('timeout')),15000)});
+ const vw=ev.videoWidth,vh=ev.videoHeight;let cw,ch,gN=null;
  if(ratio==='orig'){const sc=Math.min(1,1280/Math.max(vw,vh));cw=Math.round(vw*sc/2)*2;ch=Math.round(vh*sc/2)*2}
- else if(ratio==='1/1'){cw=ch=720}else{cw=720;ch=1280}
+ else{[cw,ch]={'9/16':[720,1280],'1/1':[720,720],'4/5':[720,900],'16/9':[1280,720]}[ratio]}
  const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;const x=cv.getContext('2d');
  const st=cv.captureStream(30);let ac;
  try{ac=new(window.AudioContext||window.webkitAudioContext)();
   const src=ac.createMediaElementSource(ev),g=ac.createGain(),ds=ac.createMediaStreamDestination();
-  g.gain.value=gain;let last=src;
+  g.gain.value=gain;gN=g;let last=src;
   if($('oVoice').checked){const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=90;const cp=ac.createDynamicsCompressor();cp.threshold.value=-24;cp.ratio.value=3;src.connect(hp);hp.connect(cp);last=cp}
   last.connect(g);g.connect(ds);ds.stream.getAudioTracks().forEach(t=>st.addTrack(t))}catch(e){}
  const mime=['video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
  const rec=new MediaRecorder(st,mime?{mimeType:mime,videoBitsPerSecond:5e6}:{});
- const chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
- const total=segs.reduce((a,s)=>a+s[1]-s[0],0);let i=0,done=0,fin=false;
+ recRef=rec;evRef=ev;rec.onerror=ev.onerror=()=>{if(fin)return;fin=true;try{ev.pause()}catch(_){}releaseLock();$('msg').innerHTML='<span class="err">Recording failed. Try Fill framing or a shorter clip.</span>';go.disabled=false;go.textContent='Try export again';$('pb').hidden=true};const chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+ const total=segs.reduce((a,s)=>a+s[1]-s[0],0);let i=0,done=0,fin=false,fo=false;
+ const bc=document.createElement('canvas');bc.width=36;bc.height=Math.max(2,Math.round(36*ch/cw));const bx=bc.getContext('2d');
  const draw=()=>{x.filter=filt();const sr=vw/vh,tr=cw/ch;let sw=vw,sh=vh,sx=0,sy=0;
   if(sr>tr){sw=vh*tr;sx=(vw-sw)/2}else{sh=vw/tr;sy=(vh-sh)/2}if($('oZoom').checked&&i%2===1){const z=1.12,nw=sw/z,nh=sh/z;sx+=(sw-nw)/2;sy+=(sh-nh)/2;sw=nw;sh=nh}
-  x.drawImage(ev,sx,sy,sw,sh,0,0,cw,ch);
+  if(FIT&&ratio!=='orig'){const z=$('oZoom').checked&&i%2===1?1.12:1;bx.drawImage(ev,0,0,bc.width,bc.height);x.filter='none';x.imageSmoothingQuality='high';x.drawImage(bc,0,0,cw,ch);x.fillStyle='rgba(0,0,0,.35)';x.fillRect(0,0,cw,ch);x.filter=filt();const k=Math.min(cw/vw,ch/vh)*z,dw=vw*k,dh=vh*k;x.drawImage(ev,(cw-dw)/2,(ch-dh)/2,dw,dh)}else x.drawImage(ev,sx,sy,sw,sh,0,0,cw,ch);
   const hk=$('hook').value.trim(),ot=(done+Math.max(0,ev.currentTime-(segs[i]||[0])[0]))/SP;
   if(hk&&ot<=3)hookText(x,hk,cw,ch)};
  const finish=()=>{if(fin)return;fin=true;rec.stop();ev.pause()};
  rec.onstop=()=>{const ext=rec.mimeType.includes('mp4')?'mp4':'webm';
   const blob=new Blob(chunks,{type:rec.mimeType||'video/webm'});
-  $('out').innerHTML=`<button class='go' id='dlb' style='background:var(--ok);margin-top:10px'>⬇ Save edited video (${ext.toUpperCase()})</button>`;$('dlb').onclick=()=>saveFile(blob,'editless-edit.'+ext);
-  go.disabled=false;go.textContent='Export again';$('pf').style.width='100%';$('s3c').className='done';ac&&ac.close()};
- const tick=()=>{if(fin)return;draw();const t=ev.currentTime,s=segs[i];
-  if(t>=s[1]-.02||ev.ended){done+=s[1]-s[0];i++;if(i>=segs.length){finish();return}ev.currentTime=segs[i][0]}
+  $('out').innerHTML=`<button class='go' id='dlb' style='background:var(--ok);margin-top:10px'>⬇ Save edited video (${ext.toUpperCase()})</button>`;$('dlb').onclick=()=>saveFile(blob,'editless-edit.'+ext);if(ext==='webm')$('msg').textContent='Saved as WebM. It works for YouTube and TikTok. If another app rejects it, convert it with any free converter.';
+  go.disabled=false;go.textContent='Export again';releaseLock();$('pf').style.width='100%';$('s3c').className='done';ac&&ac.close()};
+ const tick=()=>{if(fin)return;draw();const t=ev.currentTime,s=segs[i];if(gN&&!fo&&t>=s[1]-.07){fo=true;const n=ac.currentTime;gN.gain.setValueAtTime(gain,n);gN.gain.linearRampToValueAtTime(0,n+.06)}
+  if(t>=s[1]-.02||ev.ended){done+=s[1]-s[0];i++;if(i>=segs.length){finish();return}ev.currentTime=segs[i][0];fo=false;if(gN){const n=ac.currentTime;gN.gain.cancelScheduledValues(n);gN.gain.setValueAtTime(0,n);gN.gain.linearRampToValueAtTime(gain,n+.05)}}
   const p=Math.min(100,(done+Math.max(0,t-segs[i][0]))/total*100);$('pf').style.width=p+'%';go.textContent='Editing… '+Math.round(p)+'%';
   requestAnimationFrame(tick)};
- ev.currentTime=segs[0][0];await new Promise(r=>ev.onseeked=r);
+ await seekTo(ev,segs[0][0]);
  if(ac&&ac.state==='suspended')await ac.resume();
- ev.playbackRate=SP;rec.start(500);await ev.play();requestAnimationFrame(tick)};
+ ev.playbackRate=SP;rec.start(500);await ev.play();requestAnimationFrame(tick)}
 
-if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+const sessionActive=()=>!$('ed').hidden;
+function applyUpdate(){if(!waiting||exporting)return;reloading=true;waiting.postMessage({type:'SKIP_WAITING'})}
+function offerUpdate(){if(!waiting)return;if(!sessionActive()&&!exporting){applyUpdate();return}
+ $('upd').hidden=false;$('updgo').disabled=exporting;waiting.postMessage({type:'GET_VERSION'})}
+$('updgo').onclick=applyUpdate;$('updlater').onclick=()=>{$('upd').hidden=true};
+addEventListener('beforeunload',e=>{if(!reloading&&(exporting||sessionActive())){e.preventDefault();e.returnValue=''}});
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)location.reload()});
+ navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='VERSION')$('updt').textContent='Version '+e.data.version+' is ready. Your current edit is safe until you choose to update.'});
+ navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
+  const track=w=>w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller){waiting=w;offerUpdate()}});
+  if(reg.waiting&&navigator.serviceWorker.controller){waiting=reg.waiting;offerUpdate()}
+  reg.addEventListener('updatefound',()=>track(reg.installing));
+  const chk=()=>reg.update().catch(()=>{});setInterval(chk,3600000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});
+ }).catch(()=>{});
+ navigator.serviceWorker.ready.then(()=>{$('off').hidden=false}).catch(()=>{});
+}
 let dp;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('inst').hidden=false});
 addEventListener('appinstalled',()=>{$('inst').hidden=true});
 $('inst').onclick=async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;$('inst').hidden=true};

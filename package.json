@@ -1,0 +1,12 @@
+{
+  "name": "editless",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Free, private, in-browser auto video editor (installable PWA). No server, no uploads.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/build.mjs && node tests/run.cjs"
+  },
+  "engines": { "node": ">=18" },
+  "devDependencies": { "playwright": "^1.56.0" }
+}
